@@ -120,7 +120,8 @@
   notify:
     - "clean repo files from proxy creds"
   tags:
-    - zabbix-agent
+    - zabbix-proxy
+    - init
 
 - name: "RedHat | Installing zabbix-proxy-{{ zabbix_proxy_database }}"
   package:
@@ -136,6 +137,9 @@
     zabbix_repo != "other"
   register: is_zabbix_proxy_package_installed
   until: is_zabbix_proxy_package_installed is succeeded
+  tags:
+    - zabbix-proxy
+    - init
 
 - name: "RedHat | Installing zabbix-proxy-{{ zabbix_proxy_database }} (When zabbix_repo == other)"
   package:
@@ -146,6 +150,9 @@
     zabbix_repo == "other"
   register: is_zabbix_proxy_package_installed
   until: is_zabbix_proxy_package_installed is succeeded
+  tags:
+    - zabbix-proxy
+    - init
 
 - name: "RedHat | Installing zabbix-sql-scripts"
   package:
@@ -163,7 +170,8 @@
     - zabbix_repo != "other"
   become: true
   tags:
-    - zabbix-server
+    - zabbix-proxy
+    - init
 
 - name: "RedHat | Installing zabbix-sql-scripts (When zabbix_repo == other)"
   package:
@@ -176,7 +184,8 @@
     - zabbix_repo == "other"
   become: true
   tags:
-    - zabbix-server
+    - zabbix-proxy
+    - init
 
 - name: "RedHat | Install Ansible PostgreSQL module dependencies"
   yum:
@@ -211,7 +220,8 @@
     - zabbix_proxy_database == 'pgsql'
     - ansible_distribution_major_version == "8"
   tags:
-    - zabbix-server
+    - zabbix-proxy
+    - init
 
 - name: "RedHat | Install Mysql Client package RHEL7"
   yum:
@@ -308,6 +318,7 @@
     - zabbix_proxy_database == 'sqlite3'
   tags:
     - zabbix-proxy
+    - init
 
 - name: "Configure SELinux when enabled"
   include: selinux.yml

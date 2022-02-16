@@ -95,6 +95,10 @@
     mode: "{{ zabbix_proxy_conf_mode }}"
   notify: restart zabbix-proxy
   become: true
+  tags:
+    - zabbix-proxy
+    - config
+    - init
 
 - name: "Installing the Zabbix-api package on localhost"
   pip:
