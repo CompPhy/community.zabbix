@@ -76,13 +76,15 @@ LogFile={{ zabbix_proxy_logfile }}
 #
 LogFileSize={{ zabbix_proxy_logfilesize }}
 
+{% if zabbix_version is version('3.4', '>=') %}
 ### Option: EnableRemoteCommands
 #	Whether remote commands from Zabbix server are allowed.
 #	0 - not allowed
 #	1 - allowed
 #
-EnableRemoteCommands={{ zabbix_proxy_enableremotecommands }}
+EnableRemoteCommands={{ zabbix_proxy_enableremotecommands }
 
+{% endif %}
 ### Option: DebugLevel
 #	Specifies debug level
 #	0 - no debug
