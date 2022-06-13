@@ -7,7 +7,7 @@ server {
 {% if zabbix_letsencrypt %}
     listen 80;
     server_tokens off;
-    server_name     {{ zabbix_websrv_servername }} {{ zabbix_url_aliases | join(" ") }};
+    server_name     {{ zabbix_websrv_servername }} {{ zabbix_url_aliases | join(' ') }};
     location ^~ /.well-known/acme-challenge {
         root {{ zabbix_letsencrypt_webroot_path | default('/var/www/letsencrypt') }};
         # disables IP restrictions and HTTP auth
