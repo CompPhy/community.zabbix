@@ -39,7 +39,7 @@ server {
 
 {% endif %}
     server_tokens off;
-    server_name     {{ zabbix_websrv_servername }} {% for alias in zabbix_url_aliases -%}{{ alias -}} {% endfor %};
+    server_name     {{ zabbix_websrv_servername }} {{ zabbix_url_aliases | join(' ') }};
 
 {% if zabbix_web_allowlist_ips is defined and zabbix_web_allowlist_ips %}
     # Allow list IPs via zabbix_web_allowlist_ips
