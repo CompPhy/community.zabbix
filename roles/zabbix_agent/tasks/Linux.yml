@@ -113,8 +113,8 @@
   template:
     src: "{{ 'zabbix_agentd.conf.j2' if not zabbix_agent2 else 'zabbix_agent2.conf.j2' }}"
     dest: "/etc/zabbix/{{ zabbix_agent_conf if not zabbix_agent2 else zabbix_agent2_conf }}"
-    owner: root
-    group: root
+    owner: zabbix
+    group: zabbix
     mode: "{{ zabbix_agent_conf_mode }}"
   notify:
     - restart zabbix-agent
@@ -183,7 +183,7 @@
 - name: "Create include dir zabbix-agent"
   file:
     path: "{{ zabbix_agent_include if not zabbix_agent2 else zabbix_agent2_include }}"
-    owner: root
+    owner: zabbix
     group: zabbix
     mode: "{{ zabbix_agent_include_mode if not zabbix_agent2 else zabbix_agent2_include_mode }}"
     state: directory
