@@ -60,16 +60,25 @@
   when:
     - zabbix_proxy_tlspskfile is defined
 
+- name: "Stat {{ zabbix_proxy_tlspskfile }}"
+  stat:
+    path: zabbix_proxy_tlspskfile
+  register: zabbix_proxy_tlspskfile_stat
+
 - name: "Generate a random PSK."
   shell:
     cmd: openssl rand -hex 32
   register: psk
-  when: zabbix_proxy_tlspsk_secret is not defined
+  when:
+    - not zabbix_proxy_tlspskfile_stat.stat.exists
+    - zabbix_proxy_tlspsk_secret is not defined
 
-- name: "Register zabbix_proxy_tlspsk_secret variable."
+- name: "Set psk.stdout to zabbix_proxy_tlspsk_secret variable."
   set_fact:
     zabbix_proxy_tlspsk_secret: "{{ psk.stdout }}"
-  when: zabbix_proxy_tlspsk_secret is not defined
+  when:
+    - not zabbix_proxy_tlspskfile_stat.stat.exists
+    - zabbix_proxy_tlspsk_secret is not defined
 
 - name: "Place TLS PSK File"
   copy:
