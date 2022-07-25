@@ -153,7 +153,7 @@ DBPort={{ zabbix_proxy_dbport }}
 # Mandatory: no
 # Default:
 # AllowUnsupportedDBVersions=0
-AllowUnsupportedDBVersions={{ zabbix_proxy_allowunsupporteddbversions }}
+AllowUnsupportedDBVersions={{ zabbix_proxy_allowunsupporteddbversions | int }}
 {% endif %}
 
 ######### PROXY SPECIFIC PARAMETERS #############
