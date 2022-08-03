@@ -11,8 +11,10 @@
     - not zabbix_agent_docker
     - zabbix_agent_os_family != "Windows" and zabbix_agent_os_family != "Darwin"
 
-- name: firewalld-reload
-  command: "firewall-cmd --reload"
+- name: restart firewalld
+  service:
+    name: firewalld
+    state: restarted
   become: true
   when:
     - ansible_facts.services["firewalld"] is defined

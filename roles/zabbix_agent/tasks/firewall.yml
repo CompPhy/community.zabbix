@@ -35,7 +35,7 @@
   when:
     - zabbix_agent_firewalld_enable | bool
   notify:
-    - firewalld-reload
+    - restart firewalld
   tags: zabbix_agent_firewalld_enable
 
 - name: "Firewall | Configure firewalld (zabbix_agent_jmx_listenport)"
@@ -49,5 +49,5 @@
     - zabbix_agent_firewalld_enable | bool
     - zabbix_agent_jmx_listenport | bool
   notify:
-    - firewalld-reload
+    - restart firewalld
   tags: zabbix_agent_firewalld_enable
