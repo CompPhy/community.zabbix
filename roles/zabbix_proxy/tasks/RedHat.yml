@@ -57,12 +57,12 @@
   tags:
     - zabbix-server
 
-- name: "RedHat | Set facts for Zabbix >= 3.0 and RedHat 8"
+- name: "RedHat | Set facts for Zabbix >= 4.0 and RedHat 8"
   set_fact:
     apache_log: httpd
     datafiles_path: "/usr/share/doc/zabbix-proxy-{{ zabbix_proxy_database }}"
   when:
-    - zabbix_version is version('3.0', '>=')
+    - zabbix_version is version('4.0', '>=')
     - zabbix_version is version('5.4', '<')
     - ansible_distribution_major_version == '8'
   tags:
@@ -147,7 +147,8 @@
     state: "{{ zabbix_proxy_package_state }}"
   become: true
   when:
-    zabbix_repo == "other"
+    - zabbix_version is version('4.0', '>=')
+    - zabbix_repo == "other"
   register: is_zabbix_proxy_package_installed
   until: is_zabbix_proxy_package_installed is succeeded
   tags:
