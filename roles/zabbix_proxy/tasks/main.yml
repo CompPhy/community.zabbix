@@ -63,6 +63,8 @@
     path: "{{ zabbix_proxy_tlspskfile | dirname }}"
     mode: 0755
     state: directory
+    owner: zabbix
+    group: zabbix
   become: true
   when:
     - zabbix_proxy_tlspskfile is defined
