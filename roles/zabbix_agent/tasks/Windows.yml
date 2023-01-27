@@ -7,6 +7,7 @@
   set_fact:
     windows_arch: 64
   when:
+    - ansible_architecture is defined
     - ansible_architecture == "64-bit"
 
 - name: "Windows | Set path to zabbix.exe"
