@@ -55,7 +55,15 @@
   when:
     - zabbix_version is version('5.4', '>=')
   tags:
-    - zabbix-server
+    - zabbix-proxy
+
+- name: "RedHat | Set facts for Zabbix >= 6.0"
+  set_fact:
+    datafiles_path: "/usr/share/zabbix-sql-scripts/{{ zabbix_proxy_database_long }}"
+  when:
+    - zabbix_version is version('6.0', '>=')
+  tags:
+    - zabbix-proxy
 
 - name: "RedHat | Set facts for Zabbix >= 4.0 and RedHat 8"
   set_fact:
@@ -74,7 +82,7 @@
   when:
     - zabbix_repo == "epel"
   tags:
-    - zabbix-server
+    - zabbix-proxy
 
 - name: "RedHat | Create 'zabbix' group (EPEL)"
   group:
