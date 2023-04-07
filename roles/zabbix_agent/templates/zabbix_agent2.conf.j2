@@ -83,6 +83,7 @@ Timeout={{ zabbix_agent2_timeout }}
 Include={{ zabbix_agent_win_include }}
 {% else %}
 Include={{ zabbix_agent2_include }}/{{ zabbix_agent2_include_pattern }}
+Include=/etc/zabbix/zabbix_agent2.d/plugins.d/
 {% endif %}
 UnsafeUserParameters={{ zabbix_agent2_unsafeuserparameters }}
 {% if zabbix_agent_os_family != "Windows" %}
