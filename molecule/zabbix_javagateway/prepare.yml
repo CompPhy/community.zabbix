@@ -30,8 +30,6 @@
     # https://github.com/geerlingguy/ansible-role-java/issues/64
     - name: "Apt update"
       shell: "apt-get update && mkdir -p /usr/share/man/man1"
-      args:
-        warn: false
       register: installation_dependencies
       until: installation_dependencies is succeeded
       when:

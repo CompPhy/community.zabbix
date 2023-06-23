@@ -76,8 +76,6 @@
 
 - name: "Do a yum clean"
   shell: yum clean all
-  args:
-    warn: false
   when: yum_repo_installed.changed
   become: true
   tags:

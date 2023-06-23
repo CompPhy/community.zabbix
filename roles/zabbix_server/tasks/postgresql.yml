@@ -102,7 +102,6 @@
   args:
     creates: /etc/zabbix/schema.done
     executable: /bin/bash
-    warn: false
   environment:
     PGPASSWORD: "{{ zabbix_server_dbpassword }}"
   when:
@@ -126,7 +125,6 @@
   args:
     creates: /etc/zabbix/timescaledb.done
     executable: /bin/bash
-    warn: false
   environment:
     PGPASSWORD: "{{ zabbix_server_dbpassword }}"
   when:
@@ -174,7 +172,6 @@
   args:
     creates: /etc/zabbix/schema.done
     executable: /bin/bash
-    warn: false
   environment:
     PGPASSWORD: "{{ zabbix_server_dbpassword }}"
   when:
@@ -193,7 +190,6 @@
     -f images.sql && touch /etc/zabbix/images.done
   args:
     creates: /etc/zabbix/images.done
-    warn: false
   environment:
     PGPASSWORD: "{{ zabbix_server_dbpassword }}"
   when: (zabbix_version is version('3.0', '<') and zabbix_database_sqlload) or (zabbix_repo == "epel" and zabbix_database_sqlload)
@@ -211,7 +207,6 @@
     -f data.sql && touch /etc/zabbix/data.done
   args:
     creates: /etc/zabbix/data.done
-    warn: false
   environment:
     PGPASSWORD: "{{ zabbix_server_dbpassword }}"
   when: (zabbix_version is version('3.0', '<') and zabbix_database_sqlload) or (zabbix_repo == "epel" and zabbix_database_sqlload)
