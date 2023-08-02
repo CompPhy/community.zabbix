@@ -35,9 +35,22 @@ options:
       - name: ANSIBLE_ZABBIX_URL_PATH
     vars:
       - name: ansible_zabbix_url_path
+  http_login_user:
+    type: str
+    description:
+      - The http user to access zabbix url with Basic Auth
+    vars:
+      - name: http_login_user
+  http_login_password:
+    type: str
+    description:
+      - The http password to access zabbix url with Basic Auth
+    vars:
+      - name: http_login_password
 """
 
 import json
+import base64
 
 from uuid import uuid4
 
@@ -45,12 +58,6 @@ from ansible.module_utils.basic import to_text
 from ansible.errors import AnsibleConnectionFailure
 from ansible.plugins.httpapi import HttpApiBase
 from ansible.module_utils.connection import ConnectionError
-
-
-BASE_HEADERS = {
-    'Content-Type': 'application/json-rpc',
-    'Accept': 'application/json',
-}
 
 
 class HttpApi(HttpApiBase):
@@ -72,10 +79,30 @@ class HttpApi(HttpApiBase):
             self.connection._auth = {'auth': self.auth_key}
             return
 
-        payload = self.payload_builder("user.login", user=username, password=password)
-        code, response = self.send_request(data=payload)
+        if not self.auth_key:
+            # Provide "fake" auth so netcommon.connection does not replace our headers
+            self.connection._auth = {'auth': 'fake'}
+
+        # login() method is called "somehow" as a very first call to the REST API.
+        # This collection's code first of all executes api_version() but login() anyway
+        # is called first (I suspect due to complicated (for me) httpapi modules inheritance/communication
+        # model). Bottom line: at the time of login() execution we are not aware of Zabbix version.
+        # Proposed approach: first execute "user.login" with "user" parameter and if it fails then
+        # execute "user.login" with "username" parameter.
+        # Zabbix < 5.0 supports only "user" parameter.
+        # Zabbix >= 6.0 and <= 6.2 support both "user" and "username" parameters.
+        # Zabbix >= 6.4 supports only "username" parameter.
+        try:
+            # Zabbix <= 6.2
+            payload = self.payload_builder("user.login", user=username, password=password)
+            code, response = self.send_request(data=payload)
+        except ConnectionError:
+            # Zabbix >= 6.4
+            payload = self.payload_builder("user.login", username=username, password=password)
+            code, response = self.send_request(data=payload)
 
         if code == 200 and response != '':
+            # Replace auth with real api_key we got from Zabbix after successful login
             self.connection._auth = {'auth': response}
 
     def logout(self):
@@ -87,12 +114,17 @@ class HttpApi(HttpApiBase):
         url_path = self.get_option('zabbix_url_path')
         if isinstance(url_path, str):
             # zabbix_url_path provided (even if it is an empty string)
-            self.url_path = '/' + url_path
+            if url_path == '':
+                self.url_path = ''
+            else:
+                self.url_path = '/' + url_path
         if not self.zbx_api_version:
             if not hasattr(self.connection, 'zbx_api_version'):
                 code, version = self.send_request(data=self.payload_builder('apiinfo.version'))
-                if code == 200 and version != '':
+                if code == 200 and len(version) != 0:
                     self.connection.zbx_api_version = version
+                else:
+                    raise ConnectionError("Could not get API version from Zabbix. Got HTTP code %s. Got version %s" % (code, version))
             self.zbx_api_version = self.connection.zbx_api_version
         return self.zbx_api_version
 
@@ -104,6 +136,22 @@ class HttpApi(HttpApiBase):
         if self.connection._auth:
             data['auth'] = self.connection._auth['auth']
 
+        hdrs = {
+            'Content-Type': 'application/json-rpc',
+            'Accept': 'application/json',
+        }
+        http_login_user = self.get_option('http_login_user')
+        http_login_password = self.get_option('http_login_password')
+        if http_login_user and http_login_user != '-42':
+            # Need to add Basic auth header
+            credentials = (http_login_user + ':' + http_login_password).encode('ascii')
+            hdrs['Authorization'] = 'Basic ' + base64.b64encode(credentials).decode("ascii")
+
+        if data['method'] in ['user.login', 'apiinfo.version']:
+            # user.login and apiinfo.version do not need "auth" in data
+            # we provided fake one in login() method to correctly handle HTTP basic auth header
+            data.pop('auth', None)
+
         data = json.dumps(data)
         try:
             self._display_request(request_method, path)
@@ -111,7 +159,7 @@ class HttpApi(HttpApiBase):
                 path,
                 data,
                 method=request_method,
-                headers=BASE_HEADERS
+                headers=hdrs
             )
             value = to_text(response_data.getvalue())
 
@@ -168,3 +216,12 @@ class HttpApi(HttpApiBase):
         req['params'] = (kwargs)
 
         return req
+
+    def handle_httperror(self, exc):
+        # The method defined in ansible.plugins.httpapi
+        # We need to override it to avoid endless re-tries if HTTP authentication fails
+
+        if exc.code == 401:
+            return False
+
+        return exc

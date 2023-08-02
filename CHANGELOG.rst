@@ -5,6 +5,190 @@ community.zabbix Release Notes
 .. contents:: Topics
 
 
+v2.1.0
+======
+
+Minor Changes
+-------------
+
+- Multiple Roles - Replaced depricated 'include' statements with 'include_tasks'
+- Update action_groups variable in runtime.yml
+- all roles - Added support for Debian 12 (Bookworm)
+- all roles - Delete gpg ids variable.
+- all roles - Modified to allow a non-root user to run the role.
+- all roles - Updated testing to account for the correct version of Zabbix
+- zabbix_hostmacro module - Add description property for Host macro creation/update. Allow to set/update description of Zabbix host macros.
+- zabbix_proxy - Added installation of PyMySQL pip package
+- zabbix_proxy - Modified installation of Centos 7 MySQL client
+- zabbix_proxy - Standardized MySQL client installed on Debian and Ubuntu
+- zabbix_regexp module added
+- zabbix_settings module added
+- zabbix_token module added
+
+Bugfixes
+--------
+
+- agent role - Added missing become statement to allow run to role as nonroot
+- zabbix_host module - fix updating hosts that were discovered via LLD
+- zabbix_proxy role - failed at version validation. Fix adds cast of zabbix_proxy_version to float, similarly to the other roles.
+- zabbix_proxy role - undefined vars at updating proxy definition. Fix adds null defaults for zabbix_proxy_tlsaccept and zabbix_proxy_tlsconnect.
+- zabbix_web role - removed 'ssl on;' nginx configuration, which is no longer supported since nginx version 1.25.1.
+
+New Modules
+-----------
+
+- community.zabbix.zabbix_regexp - Create/update/delete Zabbix regular expression
+- community.zabbix.zabbix_settings - Update Zabbix global settings.
+- community.zabbix.zabbix_token - Create/Update/Generate/Delete Zabbix token.
+
+v2.0.1
+======
+
+Bugfixes
+--------
+
+- Proxy and Agent Roles - Added `zabbix_api_use_ssl` variable to allow secure API connections
+- Web Role - Added defaults and documentation for `zabbix_apache_custom_includes`
+- agent - Handled undefined variable error for Windows default versions
+- all roles - Added option to selectively disable a repo on Redhat installs
+
+v2.0.0
+======
+
+Minor Changes
+-------------
+
+- Replaced usage of deprecated apt key management in Debian based distros - See https://wiki.debian.org/DebianRepository/UseThirdParty
+- Standardized tags across all roles.
+- Updated all roles to default to version 6.4 for install.
+- all roles - removed unused variables from defaults
+- all roles - standardized testing matrix to check all supported versions and operating systems.
+- all roles - temporarily disable epel repo on zabbix installation tasks
+- all roles - updated documentation.
+- inventory plugin - switched from using zabbix-api to custom implementation adding authentication with tokens
+- inventory script - re-coded to stop using zabbix-api. API tokens support added.
+- web role - removed support for htpasswd
+
+Breaking Changes / Porting Guide
+--------------------------------
+
+- agent role - removed support for Darwin, Amazon, Fedora, XCP-ng, Suse, Mint, and Sangoma operating systems
+- agent role - removed support for zabbix_create_host and replaced it with zabbix_agent_host_state
+- agent role - removed support for zabbix_create_hostgroup and replaced it with zabbix_agent_hostgroups_state
+- agent role - removed support for zabbix_http_password, zabbix_api_http_password, zabbix_api_pass, and zabbix_api_login_pass and replaced it with zabbix_api_login_pass
+- agent role - removed support for zabbix_http_user, zabbix_api_http_user, zabbix_api_user, and zabbix_api_login_user and replaced it with zabbix_api_login_user
+- agent role - removed support for zabbix_inventory_mode and replaced it with zabbix_agent_inventory_mode
+- agent role - removed support for zabbix_link_templates adn replaced it with zabbix_agent_link_templates
+- agent role - removed support for zabbix_macros and replaced it with zabbix_agent_macros
+- agent role - removed support for zabbix_proxy and replaced it with zabbix_agent_proxy
+- agent role - removed support for zabbix_update_host and replaced it with zabbix_agent_host_update
+- all modules - dropped support of Zabbix versions < 6.0
+- all roles  - removed support for the zabbix_version variable.
+- all roles - removed support for all versions of Zabbix < 6.0.
+- all roles - removed support for installation from epel and non-standard repositories
+- dropped support of zabbix-api to make REST API calls to Zabbix
+- proxy role - removed support for zabbix_database_creation  and replaced it with zabbix_proxy_database_creation
+- proxy role - removed support for zabbix_database_sqlload  and replaced it with zabbix_proxy_database_sqlload
+- proxy role - removed support for zabbix_selinux  and replaced it with zabbix_proxy_selinux
+- server role - removed support for zabbix_server_mysql_login_password and replaced with zabbix_server_dbpassword
+- server role - removed support for zabbix_server_mysql_login_user and replaced with zabbix_server_dbuser
+- stopped supporting Ansible < 2.12
+- stopped supporting Python < 3.9
+- zabbix_action - message parameter renamed to op_message
+- zabbix_group_facts module - removed in favour of zabbix_group_info
+- zabbix_host_facts module - removed in favour of zabbix_host_info
+
+Removed Features (previously deprecated)
+----------------------------------------
+
+- agent role - removed support to configure firewall
+- web role - removed installation of apache, debian, and php
+
+v1.9.3
+======
+
+Minor Changes
+-------------
+
+- httpapi plugin - updated to work with Zabbix 6.4.
+- zabbix_action, zabbix_authentication, zabbix_discovery_rule, zabbix_mediatype, zabbix_user, zabbix_user_directory, zabbix_usergroup - updated to work with Zabbix 6.4.
+- zabbix_agent role - Add support for SUSE Linux Enterprise Server for SAP Applications ("SLES_SAP").
+- zabbix_host - add missing variants for SNMPv3 authprotocol and privprotocol introduced by Zabbix 6
+- zabbix_proxy role - Add variable zabbix_proxy_dbpassword_hash_method to control whether you want postgresql user password to be hashed with md5 or want to use db default. When zabbix_proxy_dbpassword_hash_method is set to anything other than md5 then do not hash the password with md5 so you could use postgresql scram-sha-256 hashing method.
+- zabbix_server role - Add variable zabbix_server_dbpassword_hash_method to control whether you want postgresql user password to be hashed with md5 or want to use db default. When zabbix_server_dbpassword_hash_method is set to anything other than md5 then do not hash the password with md5 so you could use postgresql scram-sha-256 hashing method.
+- zabbix_usergroup module - userdirectory, hostgroup_rights and templategroup_rights parameters added (Zabbix >= 6.2)
+- zabbix_web role - possibility to add custom includes in apache vhost config
+
+Bugfixes
+--------
+
+- compatibility with ansible.netcommon 5.0.0
+- treat sendto parameter in module zabbix_user according to real media type, do not rely on media name
+- zabbix-proxy role - fix tags for postgresql task.
+- zabbix_agent role - Fix MacOS install never executed because of the missing include_tasks "Darwin.yml" in the "main.yml" task file and wrong user permission on folder/files.
+- zabbix_user module - ability to specify several e-mail addresses in Zabbix User's  media
+
+v1.9.2
+======
+
+Bugfixes
+--------
+
+- zabbix_agent and zabbix_proxy roles - fixed a bug whith ansible_python_interpreter not being set correctly in some corner cases
+- zabbix_agent role - Fix MacOS install never executed because of the missing include_tasks "Darwin.yml" in the "main.yml" task file and wrong user permission on folder/files.
+- zabbix_agent, zabbix_proxy and zabbix_server roles - make Ansible 2.14 compatible by removing warn parameter
+
+v1.9.1
+======
+
+Minor Changes
+-------------
+
+- zabbix suport for rhel 9
+
+Bugfixes
+--------
+
+- all modules - remove deprecation warnings for modules parameters related to zabbix-api when these parapmeters are not explicetely defined
+- all roles and modules integration tests - replace deprecated include module whith include_tasks
+- zabbix_agent, zabbix_proxy roles, all modules - make httpapi connection work with HTTP Basic Authorization
+- zabbix_proxy - do not set ServerPort config parameter which was removed in Zabbix 6.0
+- zabbix_server role Debian.yml task - remove warn: arg for shell module as the arg is deprecated since ansible-core above 2.13
+- zabbix_user_role module - creation of a User Role with Super Admin type
+
+v1.9.0
+======
+
+Major Changes
+-------------
+
+- all modules are opting away from zabbix-api and using httpapi ansible.netcommon plugin. We will support zabbix-api for backwards compatibility until next major release. See our README.md for more information about how to migrate
+- zabbix_agent and zabbix_proxy roles are opting away from zabbix-api and use httpapi ansible.netcommon plugin. We will support zabbix-api for backwards compatibility until next major release. See our README.md for more information about how to migrate
+
+Minor Changes
+-------------
+
+- ansible_zabbix_url_path introduced to be able to specify non-default Zabbix WebUI path, e.g. http://<FQDN>/zabbixeu
+- collection now supports creating ``module_defaults`` for ``group/community.zabbix.zabbix`` (see https://github.com/ansible-collections/community.zabbix/issues/326)
+- fixed ``zabbix_server`` role failure running in check_mode (see https://github.com/ansible-collections/community.zabbix/issues/804)
+- zabbix_agent - give Zabbix Agent access to the Linux DMI table allowing system.hw.chassis info to populate.
+- zabbix_template - add support for template tags
+- zabbix_user_role module added
+- zabbix_web - add support for Ubuntu 22.04 jammy
+
+Bugfixes
+--------
+
+- The inventory script had insufficient error handling in case the Zabbix API provided an empty interfaces list. This bugfix checks for an exisiting interfaces element, then for the minimal length of 1 so that the first interface will only be accessed when it really exists in the api response. (https://github.com/ansible-collections/community.zabbix/issues/826)
+- zabbix-proxy - updated to install correct sources for Debian arm64 family
+- zabbix_agent - Filter IPv6 addresses from list of IP as Zabbix host creation expects IPv4
+- zabbix_agent - installation on Windows will no longer fail when zabbix_agent2 is used
+- zabbix_host - fix updating of host without interfaces
+- zabbix_proxy - correctly provision tls_accept and tls_connect on Zabbix backend
+- zabbix_proxy - updated the datafiles_path fact for the zabbix_proxy and zabbix_server roles due to upstream change
+- zabbix_server - move location of the fping(6) variables to distribution specific files (https://github.com/ansible-collections/community.zabbix/issues/812)
+- zabbix_server - updated the datafiles_path fact for the zabbix_proxy and zabbix_server roles due to upstream change
+
 v1.8.0
 ======
 

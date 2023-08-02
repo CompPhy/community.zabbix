@@ -3,9 +3,6 @@ dependency:
   name: galaxy
 driver:
   name: docker
-lint:
-  name: yamllint
-
 platforms:
   - name: zabbix-server-centos
     image: milcom/centos7-systemd:latest
@@ -46,12 +43,9 @@ provisioner:
     docker:
       create: ../default/create.yml
       destroy: ../default/destroy.yml
-  lint:
-    name: ansible-lint
   inventory:
     group_vars:
       all:
-        zabbix_agent_src_reinstall: false
         zabbix_api_create_hosts: true
         zabbix_api_create_hostgroup: true
         zabbix_api_server_url: http://zabbix-server-centos
@@ -77,5 +71,3 @@ scenario:
 
 verifier:
   name: testinfra
-  lint:
-    name: flake8

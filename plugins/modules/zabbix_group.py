@@ -45,16 +45,6 @@ notes:
 '''
 
 EXAMPLES = r'''
-# Set following variables for Zabbix Server host in play or inventory
-- name: Set connection specific variables
-  set_fact:
-    ansible_network_os: community.zabbix.zabbix
-    ansible_connection: httpapi
-    ansible_httpapi_port: 80
-    ansible_httpapi_use_ssl: false
-    ansible_httpapi_validate_certs: false
-    ansible_zabbix_url_path: 'zabbixeu'  # If Zabbix WebUI runs on non-default (zabbix) path ,e.g. http://<FQDN>/zabbixeu
-
 # If you want to use Username and Password to be authenticated by Zabbix Server
 - name: Set credentials to access Zabbix Server API
   set_fact:
@@ -69,6 +59,15 @@ EXAMPLES = r'''
 
 # Base create host groups example
 - name: Create host groups
+  # set task level variables as we change ansible_connection plugin here
+  vars:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_httpapi_port: 443
+    ansible_httpapi_use_ssl: true
+    ansible_httpapi_validate_certs: false
+    ansible_zabbix_url_path: 'zabbixeu'  # If Zabbix WebUI runs on non-default (zabbix) path ,e.g. http://<FQDN>/zabbixeu
+    ansible_host: zabbix-example-fqdn.org
   community.zabbix.zabbix_group:
     state: present
     host_groups:
@@ -77,6 +76,15 @@ EXAMPLES = r'''
 
 # Limit the Zabbix group creations to one host since Zabbix can return an error when doing concurrent updates
 - name: Create host groups
+  # set task level variables as we change ansible_connection plugin here
+  vars:
+      ansible_network_os: community.zabbix.zabbix
+      ansible_connection: httpapi
+      ansible_httpapi_port: 443
+      ansible_httpapi_use_ssl: true
+      ansible_httpapi_validate_certs: false
+      ansible_zabbix_url_path: 'zabbixeu'  # If Zabbix WebUI runs on non-default (zabbix) path ,e.g. http://<FQDN>/zabbixeu
+      ansible_host: zabbix-example-fqdn.org
   community.zabbix.zabbix_group:
     state: present
     host_groups:
@@ -85,17 +93,6 @@ EXAMPLES = r'''
   when: inventory_hostname==groups['group_name'][0]
 '''
 
-
-import traceback
-
-try:
-    from zabbix_api import Already_Exists
-
-    HAS_ZABBIX_API = True
-    ZBX_IMP_ERR = Exception()
-except ImportError:
-    ZBX_IMP_ERR = traceback.format_exc()
-    HAS_ZABBIX_API = False
 
 from ansible.module_utils.basic import AnsibleModule
 
@@ -111,13 +108,10 @@ class HostGroup(ZabbixBase):
             for group_name in group_names:
                 result = self._zapi.hostgroup.get({'filter': {'name': group_name}})
                 if not result:
-                    try:
-                        if self._module.check_mode:
-                            self._module.exit_json(changed=True)
-                        self._zapi.hostgroup.create({'name': group_name})
-                        group_add_list.append(group_name)
-                    except Already_Exists:
-                        return group_add_list
+                    if self._module.check_mode:
+                        self._module.exit_json(changed=True)
+                    self._zapi.hostgroup.create({'name': group_name})
+                    group_add_list.append(group_name)
             return group_add_list
         except Exception as e:
             self._module.fail_json(msg="Failed to create host group(s): %s" % e)
@@ -145,19 +139,13 @@ class HostGroup(ZabbixBase):
 def main():
     argument_spec = zabbix_utils.zabbix_common_argument_spec()
     argument_spec.update(dict(
-        host_groups=dict(type='list', required=True, aliases=['host_group']),
+        host_groups=dict(type='list', required=True, aliases=['host_group'], elements='str'),
         state=dict(type='str', default="present", choices=['present', 'absent']),
     ))
     module = AnsibleModule(
         argument_spec=argument_spec,
         supports_check_mode=True
     )
-
-    zabbix_utils.require_creds_params(module)
-
-    for p in ['server_url', 'login_user', 'login_password', 'timeout', 'validate_certs']:
-        if p in module.params:
-            module.warn('Option "%s" is deprecated with the move to httpapi connection and will be removed in the next release' % p)
 
     host_groups = module.params['host_groups']
     state = module.params['state']

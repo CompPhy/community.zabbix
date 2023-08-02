@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 module: zabbix_proxy_info
 short_description: Gather information about Zabbix proxy
 version_added: 1.5.0
@@ -17,7 +17,7 @@ author:
 description:
     - This module allows you to obtain detailed information about configured zabbix proxies.
 requirements:
-    - "python >= 2.6"
+    - "python >= 3.9"
 options:
     proxy_name:
         description:
@@ -33,19 +33,9 @@ options:
 extends_documentation_fragment:
 - community.zabbix.zabbix
 
-'''
+"""
 
-EXAMPLES = '''
-# Set following variables for Zabbix Server host in play or inventory
-- name: Set connection specific variables
-  set_fact:
-    ansible_network_os: community.zabbix.zabbix
-    ansible_connection: httpapi
-    ansible_httpapi_port: 80
-    ansible_httpapi_use_ssl: false
-    ansible_httpapi_validate_certs: false
-    ansible_zabbix_url_path: 'zabbixeu'  # If Zabbix WebUI runs on non-default (zabbix) path ,e.g. http://<FQDN>/zabbixeu
-
+EXAMPLES = """
 # If you want to use Username and Password to be authenticated by Zabbix Server
 - name: Set credentials to access Zabbix Server API
   set_fact:
@@ -59,15 +49,21 @@ EXAMPLES = '''
     ansible_zabbix_auth_key: 8ec0d52432c15c91fcafe9888500cf9a607f44091ab554dbee860f6b44fac895
 
 - name: Get zabbix proxy info alongside the list of hosts monitored by the proxy
+  # set task level variables as we change ansible_connection plugin here
+  vars:
+    ansible_network_os: community.zabbix.zabbix
+    ansible_connection: httpapi
+    ansible_httpapi_port: 443
+    ansible_httpapi_use_ssl: true
+    ansible_httpapi_validate_certs: false
+    ansible_zabbix_url_path: "zabbixeu"  # If Zabbix WebUI runs on non-default (zabbix) path ,e.g. http://<FQDN>/zabbixeu
+    ansible_host: zabbix-example-fqdn.org
   community.zabbix.zabbix_proxy_info:
-    server_url: "http://zabbix.example.com/zabbix/"
-    login_user: admin
-    login_password: secret
     proxy_name: zbx01.example.com
-    proxy_hosts: True
-'''
+    proxy_hosts: true
+"""
 
-RETURN = '''
+RETURN = """
 zabbix_proxy:
   description: example
   returned: always
@@ -121,7 +117,7 @@ zabbix_proxy:
     "tls_subject": "",
     "uuid": ""
   }
-'''
+"""
 
 
 from ansible.module_utils.basic import AnsibleModule
@@ -135,15 +131,15 @@ class Proxy(ZabbixBase):
     def get_proxy(self, name, hosts=False):
         result = {}
         params = {
-            'filter': {
-                'host': name
+            "filter": {
+                "host": name
             },
-            'output': 'extend',
-            'selectInterface': 'extend',
+            "output": "extend",
+            "selectInterface": "extend",
         }
 
         if hosts:
-            params['selectHosts'] = ['host', 'hostid']
+            params["selectHosts"] = ["host", "hostid"]
 
         try:
             result = self._zapi.proxy.get(params)
@@ -156,8 +152,8 @@ class Proxy(ZabbixBase):
 def main():
     argument_spec = zabbix_utils.zabbix_common_argument_spec()
     argument_spec.update(dict(
-        proxy_name=dict(type='str', required=True),
-        proxy_hosts=dict(type='bool', required=False, default=False),
+        proxy_name=dict(type="str", required=True),
+        proxy_hosts=dict(type="bool", required=False, default=False),
     ))
 
     module = AnsibleModule(
@@ -165,14 +161,8 @@ def main():
         supports_check_mode=True
     )
 
-    zabbix_utils.require_creds_params(module)
-
-    for p in ['server_url', 'login_user', 'login_password', 'timeout', 'validate_certs']:
-        if p in module.params:
-            module.warn('Option "%s" is deprecated with the move to httpapi connection and will be removed in the next release' % p)
-
-    name = module.params['proxy_name']
-    hosts = module.params['proxy_hosts']
+    name = module.params["proxy_name"]
+    hosts = module.params["proxy_hosts"]
 
     proxy = Proxy(module)
     result = proxy.get_proxy(name, hosts)

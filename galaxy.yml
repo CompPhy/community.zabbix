@@ -1,12 +1,12 @@
 ---
 namespace: community
 name: zabbix
-version: 1.8.0
+version: 2.1.0
 readme: README.md
 authors:
-- Dusan Matejka (@D3DeFi)
-- sky-joker (@sky-joker)
-- Werner Dijkerman (@dj-wasabi)
+  - Dusan Matejka (@D3DeFi)
+  - sky-joker (@sky-joker)
+  - Werner Dijkerman (@dj-wasabi)
 description: Collection allowing to configure resources in Zabbix monitoring system
 license_file: LICENSE
 tags:
@@ -18,7 +18,7 @@ homepage: https://github.com/ansible-collections/community.zabbix
 issues: https://github.com/ansible-collections/community.zabbix/issues
 dependencies:
   ansible.windows: "*"
-  ansible.netcommon: "*"
+  ansible.netcommon: ">=3.1.1"
   ansible.posix: "*"
   community.general: "*"
   community.mysql: "*"

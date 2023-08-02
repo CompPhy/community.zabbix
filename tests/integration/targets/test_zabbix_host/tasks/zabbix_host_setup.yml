@@ -8,10 +8,20 @@
     status: active
     state: present
     interface:
-      type: 0
-      main: 1
       useip: 1
       ip: 10.5.6.7
       dns: ""
       port: 10050
   register: zabbix_proxy
+
+- name: Create Templates
+  zabbix_template:
+    template_name: "{{ item }}"
+    template_groups:
+      - Templates
+  with_items:
+    - IMAP Service
+    - NTP Service
+    - HTTP Service
+    - LDAP Service
+  when: zabbix_version | float >= 6.4
